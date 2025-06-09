@@ -12,3 +12,6 @@ __pycache__
 .ssh
 *.txt
 *.mrc
+*.log
+*.marc
+*.tsv
