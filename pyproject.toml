@@ -1,0 +1,6 @@
+[tool.pytest.ini_options]
+# Put both port directories on sys.path so test files can do
+#   `from extract_bibs.extract import ...`  (dfulmer/)
+#   `from report_bibs.pipeline import ...`  (dfulmer2/)
+# regardless of whether each tests/ subdir is or isn't a package.
+pythonpath = ["dfulmer", "dfulmer2"]
