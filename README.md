@@ -62,3 +62,10 @@ To compare the .txt files:
 
 Slavic search processing documentation  
 [https://mlit.atlassian.net/wiki/spaces/LSO/pages/9419325444/Slavic+search+processing](https://mlit.atlassian.net/wiki/spaces/LSO/pages/9419325444/Slavic+search+processing)
+
+## Utilities
+Not all MARC records come with Leader position 9 = a but if they're from Alma they should have that. ```set_leader_a.py``` will set all the Leader position 9s to a in a MARC binary file. Run it like this:
+
+```python3 set_leader_a.py testfile.mrc```
+
+and it will create the file testfile_with_as.mrc
