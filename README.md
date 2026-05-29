@@ -47,6 +47,13 @@ The next script uses the search keys of the last script to search for matches:
 An example:
 ```perl slvr_report.pl  -i June_search_20230606.txt -o slvr_20240808```
 
+## Usage Search for Matches - Python
+Give the command:  
+```python3 dfulmer2/processor.py -i [name of the file with .txt and NOT rpt.txt] -o [<out_base>]```
+
+An example:  
+```python3 dfulmer/processor.py -i outputfile.txt -o slvr_202605py```
+
 ## Comparing the output for Extract Search Keys
 
 To compare the reports:  
@@ -62,3 +69,10 @@ To compare the .txt files:
 
 Slavic search processing documentation  
 [https://mlit.atlassian.net/wiki/spaces/LSO/pages/9419325444/Slavic+search+processing](https://mlit.atlassian.net/wiki/spaces/LSO/pages/9419325444/Slavic+search+processing)
+
+## Utilities
+Not all MARC records come with Leader position 9 = a but if they're from Alma they should have that. ```set_leader_a.py``` will set all the Leader position 9s to a in a MARC binary file. Run it like this:
+
+```python3 set_leader_a.py testfile.mrc```
+
+and it will create the file testfile_with_as.mrc

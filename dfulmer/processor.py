@@ -49,7 +49,7 @@ def main(argv=sys.argv[1:]):
     date_source = defaultdict(int)
 
     with open(infile, 'rb') as fh:
-        reader = MARCReader(fh)
+        reader = MARCReader(fh, force_utf8=True)
         for record in reader:
             extract = Extract(record)
             result = extract.process()

@@ -2,7 +2,9 @@ FROM debian:bullseye
 
 LABEL maintainer="dfulmer@umich.edu"
 
-RUN apt-get update -yqq && apt-get install -yqq wget --no-install-recommends \
+RUN apt-get update && apt-get install -y git
+
+RUN apt-get update -yqq && apt-get install -yqq wget curl --no-install-recommends \
   build-essential\
   perl\
   cpanminus\
@@ -25,6 +27,7 @@ RUN cpanm Dotenv
 RUN pip3 install --no-cache-dir requests
 RUN pip3 install --no-cache-dir pymarc
 RUN pip3 install --no-cache-dir pytest
+RUN pip3 install --no-cache-dir bookops-worldcat
 
 ARG UNAME=app
 ARG UID=1000

@@ -1,0 +1,39 @@
+%% Flowchart of slvr_report.pl — the Perl reference implementation.
+%% Source: slvr_report.pl in the same directory.
+flowchart TD
+    Start([Start: perl slvr_report.pl -i input -o outbase])
+    Start --> Args["Parse args: -i, -o, -R (restart), -d (debug)"]
+    Args --> Env["Load .env<br/>user, pass for Z39.50"]
+    Env --> OpenIn["Open input file"]
+    OpenIn --> Restart{"-R restart mode?"}
+    Restart -- yes --> Scan["Scan .log for last SYSNUM<br/>position input at next line<br/>open 8 output files in APPEND mode"]
+    Restart -- no --> OpenOut["Open 8 output files in WRITE mode"]
+    OpenOut --> Headers["Write 32-column TSV header to<br/>match / near_match / no_match /<br/>not_found / toomany reports"]
+    Scan --> Connect
+    Headers --> Connect["Connect to Z39.50<br/>zcat.oclc.org:210<br/>db=OLUCWorldCat<br/>elementSetName=FD (default holdings)"]
+    Connect --> Signals["Install SIGINT / SIGTERM handlers<br/>(set exit flag, finish cleanly)"]
+    Signals --> Loop{"Read next input line"}
+    Loop -- EOF --> Summary
+    Loop -- line --> ExitChk{"Exit flag set?"}
+    ExitChk -- yes --> Summary
+    ExitChk -- no --> SleepChk{"incnt % 50 == 0?"}
+    SleepChk -- yes --> Reconnect["destroy() Z39.50 conn<br/>print STDERR 'incnt: sleeping'<br/>sleep 2 seconds<br/>print STDERR 'incnt: continue'<br/>reopen Z39.50 conn"]
+    SleepChk -- no --> Parse
+    Reconnect --> Parse["parse_line: tab-delimited KEY:VALUE<br/>fields are SYSNUM / TITLE / AUTHOR /<br/>AUTHOR_TAG / DATE / TITLE_H / ISBN /<br/>ISSN / OCLC / ARRIVAL_DATE / ..."]
+    Parse --> Search["For each defined search key<br/>in order: OCLC, ISSN, ISBN, TITLE<br/>1. norm() the term<br/>2. build PQF: @attr 1=N &quot;term&quot;<br/>3. conn->search_pqf<br/>4. if rs.size() > MAX_HITS=50 flag too-many<br/>5. else fetch each rec via rs->record(i)<br/>6. MARC::Record->new_from_usmarc<br/>7. dedup by 001 (OCLC#) into id_list"]
+    Search --> HasRecs{"Any MARC records?"}
+    HasRecs -- "no AND some too-many" --> TooMany["Print to STDOUT+STDERR<br/>print_alma_info -> toomany_rpt<br/>++toomany_cnt"]
+    HasRecs -- "no AND zero hits" --> NotFound["Print 'no records for any search terms'<br/>print_alma_info -> not_found_rpt<br/>++tot_not_found"]
+    HasRecs -- yes --> GetRecs["get_records: for each MARC record<br/>- reject if 040 b exists and != 'eng'<br/>- reject if 008/23 is not blank<br/>- title_match via field_match_word (245 a,b)<br/>  (skip record if title_match == 'no')<br/>- author_match via field_match (1xx a)<br/>- date_match (260/264/008) ('yes' or 'no')<br/>  -> write date mismatches to _review.txt<br/>- process_institutions: 948 c symbols,<br/>  EYM count, Big Ten subset<br/>- set_match_type via 22-row table<br/>- if non-exclude: append info_entry,<br/>  write MARC to .marc"]
+    GetRecs --> Dispatch{"result_match_type?"}
+    Dispatch -- "matched" --> Match["print_match -> match_rpt<br/>++match_selected, ++selected"]
+    Dispatch -- "near match" --> NearMatch["print_near_match -> near_match_rpt<br/>++near_match_selected, ++selected"]
+    Dispatch -- "(empty)" --> NoMatch["print_alma_info -> no_match_rpt<br/>++not_selected"]
+    TooMany --> LogLine["unparse_line(counters) -> .log<br/>(KEY:value, keys alphabetical)"]
+    NotFound --> LogLine
+    Match --> LogLine
+    NearMatch --> LogLine
+    NoMatch --> LogLine
+    LogLine --> Loop
+    Summary["Print to STDOUT:<br/>'==============================<br/>X records read<br/>X searches<br/>per-search-type counts<br/><br/>Write _summary_rpt.tsv:<br/>7 lines with \\t*** suffix"]
+    Summary --> End([End])
