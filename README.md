@@ -47,6 +47,13 @@ The next script uses the search keys of the last script to search for matches:
 An example:
 ```perl slvr_report.pl  -i June_search_20230606.txt -o slvr_20240808```
 
+## Usage Search for Matches - Python
+Give the command:  
+```python3 dfulmer2/processor.py -i [name of the file with .txt and NOT rpt.txt] -o [<out_base>]```
+
+An example:  
+```python3 dfulmer/processor.py -i outputfile.txt -o slvr_202605py```
+
 ## Comparing the output for Extract Search Keys
 
 To compare the reports:  
