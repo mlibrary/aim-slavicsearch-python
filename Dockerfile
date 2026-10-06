@@ -1,19 +1,23 @@
-FROM debian:bullseye
+FROM debian:bookworm
 
 LABEL maintainer="dfulmer@umich.edu"
 
-RUN apt-get update && apt-get install -y git
-
-RUN apt-get update -yqq && apt-get install -yqq wget curl --no-install-recommends \
-  build-essential\
-  perl\
-  cpanminus\
-  libxml2-dev\
-  libxslt1-dev\
-  libyaz-dev\
-  yaz\
-  python3\
-  python3-pip
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  git \
+  wget \
+  curl \
+  build-essential \
+  perl \
+  cpanminus \
+  libxml2-dev \
+  libxslt1-dev \
+  libyaz-dev \
+  yaz \
+  python3 \
+  python3-pip \
+  python3-venv \
+  python3-tk \
+  && rm -rf /var/lib/apt/lists/*
 
 RUN wget --no-check-certificate http://ftp.indexdata.dk/pub/yaz/yaz-5.30.0.tar.gz
 RUN tar -xzf yaz-5.30.0.tar.gz
@@ -24,10 +28,15 @@ RUN cpanm MARC::Lint
 RUN cpanm Net::Z3950::ZOOM
 RUN cpanm Dotenv
 
-RUN pip3 install --no-cache-dir requests
-RUN pip3 install --no-cache-dir pymarc
-RUN pip3 install --no-cache-dir pytest
-RUN pip3 install --no-cache-dir bookops-worldcat
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+RUN python -m pip install --no-cache-dir \
+  requests \
+  pymarc \
+  pytest \
+  bookops-worldcat \
+  openpyxl \
+  paramiko
 
 ARG UNAME=app
 ARG UID=1000
